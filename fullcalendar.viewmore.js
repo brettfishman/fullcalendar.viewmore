@@ -8,10 +8,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -31,13 +31,13 @@
 
       $.extend({ maxEvents: 4 }, opts); //defaults
       $(this).fullCalendar('limitEvents', opts);
-    });    
+    });
   };
-  
+
   $.fn.limitEvents.constructor = function(calendar){
     if (!(this instanceof arguments.callee)) return new arguments.callee(calendar);
     var self = this;
-  
+
     self.calendar = calendar;
 
     self.calendar.data('fullCalendar').limitEvents = function(opts){
@@ -46,7 +46,7 @@
       self.increaseHeight(25);
       self.extendCallbacks();
     }
-  };  
+  };
 })(jQuery);
 
 (function ($, undefined) {
@@ -64,23 +64,23 @@
     self.calendar.delegate('.fc-event','mousedown', function(){ //close currently open form bubbles when user clicks an existing event
       $.fn.formBubble.close();
     });
-    
+
     self.calendar.delegate('.fc-button-prev, .fc-button-next', 'click', function(){
       resetEventsRangeCounts();
     });
   };
-  
+
   this.increaseHeight = function(height, windowResized){
     var cal = this.calendar,
           cells =  cal.find('.fc-view-month tbody tr td'),
           fcDayContent = cells.find('.fc-day-content'),
           cellHeight, fcDayContentHeight;
-          
+
     if (windowResized) fcDayContent.height(1);
-          
+
     cellHeight = cells.eq(0).height(),
     fcDayContentHeight = cellHeight - cells.eq(0).find('.fc-day-number').height();
-    
+
     fcDayContent.height(fcDayContentHeight);
   };
 
@@ -104,25 +104,25 @@
                 allEvents = self.calendar.fullCalendar('clientEvents'),
                 eventDate = $.fullCalendar.formatDate(event.end || event.start,'MM/dd/yy'),
                 td, viewMoreButton;
-    
+
             event.element = element;
             event.startDateLink = startDateLink;
             event.endDateLink = endDateLink;
-    
+
             if (currentView === 'month') {
                 doEventsRangeCount(event, self.calendar); //add event quantity to range for event and day
                 td = getCellFromDate(eventDate, self.calendar);
-    
+
                 if (td.data('apptCount') > maxEvents) {
                     if (!td.find('.events-view-more').length) {
                         viewMoreButton = $('<div class="events-view-more"><a href="#view-more"><span>View More</span></a></div>')
                         .appendTo(td)
                         .click(function () {
                           var viewMoreClick = self.opts.viewMoreClick;
-                          
+
                             if (viewMoreClick && $.isFunction(viewMoreClick)) self.opts.viewMoreClick();
                             else viewMore(td, self.calendar); //show events in formBubble overlay
-                            
+
                             return false;
                         });
                     }
@@ -158,24 +158,24 @@
         }
     });
   };
-  
+
   function doEventsRangeCount(event, calInstance){
     var eventStart = event._start,
         eventEnd = event._end || event._start,
         dateRange = expandDateRange(eventStart, eventEnd),
         eventElement = event.element;
-    
+
     $(dateRange).each(function(i){
         var td = getCellFromDate($.fullCalendar.formatDate(dateRange[i],'MM/dd/yy'), calInstance),
                 currentCount = (td.data('apptCount') || 0) + 1;
 
         td.data('apptCount', currentCount);
-        
+
         if (td.data().appointments === undefined) td.data().appointments = [event];
         else td.data().appointments.push(event);
     });
   }
-  
+
   function expandDateRange(start, end){
     var value = new Date(start.getFullYear(), start.getMonth(), start.getDate()),
         values = [];
@@ -187,10 +187,10 @@
       values.push(value);
       value = new Date(value.getFullYear(), value.getMonth(), value.getDate() + 1);
     }
-    
+
     return values;
   }
-  
+
   function resetEventsRangeCounts(){
     $('.fc-view-month td').each(function(i){
         $(this).find('.events-view-more').remove();
@@ -198,12 +198,12 @@
         $.removeData(this, "appointments");
     });
   }
-  
+
   function viewMore(day, calInstance){
     var appointments = day.data('appointments'),
         elemWidth = day.outerWidth() + 1,
         self = this;
-    
+
     day.formBubble({
       graphics: {
         close: true,
@@ -220,7 +220,7 @@
       callbacks: {
         onOpen: function(){
           var bubble = $.fn.formBubble.bubbleObject;
-          
+
           bubble.addClass('overlay');
         },
         onClose: function(){
@@ -232,7 +232,7 @@
             startDateLabel = startDate.toString("MMM dS"),
             dayValue = parseInt(day.find('.fc-day-number').text()),
             eventList=$('<ul></ul>').prepend('<li><h5>' + startDateLabel + '</h5></li>');
-            
+
         elemWidth = elemWidth - 30;
 
         $(appointments).each(function(){
@@ -242,27 +242,27 @@
 
             if (apptStartDay < dayValue) $(event).addClass('arrow-left');
             if (apptEndDay > dayValue) $(event).addClass('arrow-right');
-            
+
             event.appendTo(eventList).wrap('<li>');
         });
-        
+
         eventList.wrap('<div>');
         return eventList.parent('div').html();
       }
     });
   }
-  
+
   function getCellFromDate(thisDate, calInstance){ //ties events to actual table cells, and also differentiates between "gray" dates and "black" dates
     var start = calInstance.fullCalendar('getView').start,
         end = calInstance.fullCalendar('getView').end,
         td;
 
     thisDate = Date.parse(thisDate);
-            
+
     td = $('.fc-day-number').filter(function(){
       return $(this).text()===$.fullCalendar.formatDate(thisDate,'d')
-    }).parent('td');
-            
+    }).closest('td');
+
     if (thisDate < start){ //date is in last month
         td = td.filter(':first');
     }else if (thisDate >= end){  //date is in next month
@@ -272,10 +272,10 @@
             return $(this).hasClass('fc-other-month')===false;
         });
     }
-    
+
     return td;
   }
-  
+
   function getDateFromCell(td, calInstance){
     var cellPos = {
         row: td.parent().parent().children().index(td.parent()),
@@ -284,5 +284,5 @@
 
     return calInstance.fullCalendar('getView').cellDate(cellPos);
   }
-  
+
 }).call($.fn.limitEvents.constructor.prototype, jQuery);
